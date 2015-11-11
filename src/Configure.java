@@ -1,5 +1,19 @@
+import akka.actor.ActorRef;
+
 /**
- * Created by Brooker on 11/11/2015.
+ Stores the information needed to scan a single file
  */
 public class Configure {
+    public final String file;
+    //Stores the search regex
+    public final String searchRegex;
+    //Stores reference to CollectionActor
+    public final ActorRef collectionActorReference;
+
+    public Configure(String file, String searchRegex,ActorRef collectionActorReference) {
+        this.file = file;
+        this.searchRegex = searchRegex;
+        this.collectionActorReference = collectionActorReference;
+    }
+
 }
