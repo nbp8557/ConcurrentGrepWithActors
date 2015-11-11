@@ -7,4 +7,6 @@ public class FileCount {
     public FileCount(int files){
         this.fileCount = files;
     }
+
+    public int getFileCount(){ return fileCount }
 }
