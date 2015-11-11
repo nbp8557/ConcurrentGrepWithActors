@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import akka.actor.ActorRef;
 import akka.actor.Actors.*;
 
 public class CGrep{
@@ -23,38 +25,39 @@ public class CGrep{
 
     //Search all of the files
     public void SearchAllFiles(){
-        //An arrayList to store all of the results
-        ArrayList<Future<Found>> results = new ArrayList<Future<Found>>();
-
-
-        int counter = 0;
-        //Loop through each file and queue up the tasks to the thread pool
-        for(String file: this.files){
-           counter++;
-        }
-        //Create FileCount object
-        FileCount fileCount = new FileCount(counter);
+        //An arrayList to store all configurations
+        ArrayList<Configure> configurations = new ArrayList<Configure>();
+        //An arrayList to store all scanActors
+        ArrayList<ScanActor> scanActors = new ArrayList<ScanActor>();
 
         //Create the collection Actor
         CollectionActor collectionActor = new CollectionActor();
 
-        //Send the fileCount message to the collectionActor
+        //Configuration Object to be constructed for every Scanactor
+        Configure configuration;
 
 
+        //Loop through each file and queue up the tasks to the thread pool
+        for(String file: this.files){
 
+            //NOTE: not sure if the last parameter is correct
+            //Create new configuration and queue it within the list
+            configurations.add(new Configure(file, this.searchPattern, collectionActor.context()));
+            scanActors.add(new ScanActor());
+        }
 
+        //Create FileCount object
+        FileCount fileCount = new FileCount(this.files.length);
 
+        //send fileCount to collection actor
 
+        //send configuations to scan actors
+        for(Configure config: configurations){
 
+        }
 
+        //Scan actor will send a found message to collection actor
 
-
-
-
-
-        //Tell the thread pool to shutdown
-        //NOTE: This shutdown method will wait for all tasks to complete
-        this.threadPool.shutdown();
     }
 
     public static void main(String[] args) {

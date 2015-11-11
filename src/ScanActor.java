@@ -5,9 +5,26 @@ import akka.*;
 import akka.actor.UntypedActor;
 
 public class ScanActor extends UntypedActor {
+    public Configure configuration;
 
     @Override
     public void onReceive(Object message){
+
+        //if the Object sent is the configure class
+        if(message.getClass().getName() == Configure.class.getName()){
+
+            //set the ScanActors configuration object
+            this.configuration = (Configure) message;
+
+
+
+
+
+
+        }
+
+
+
         /*
 Each file (or the standard input if no files are given) will be scanned
 by a ScanActor for occurrences of the pattern, using one actor per file.
