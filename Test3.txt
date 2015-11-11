@@ -1,0 +1,9 @@
+Long
+Integer
+Character
+String
+TEST
+test
+Test
+TesT
+
