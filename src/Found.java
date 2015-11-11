@@ -1,3 +1,4 @@
+import java.lang.String;
 import java.util.ArrayList;
 
 
@@ -11,4 +12,7 @@ public class Found {
         this.results = results;
     }
 
+    public String getFilename(){ return filename }
+
+    public ArrayList<String> getResults(){ return results }
 }
