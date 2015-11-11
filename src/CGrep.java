@@ -2,10 +2,9 @@ import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import akka.*;
-
 import akka.actor.ActorRef;
-import akka.actor.Actors.*;
+
+import static akka.actor.Actors.*;
 
 public class CGrep{
     //Used for the thread pool
@@ -29,10 +28,10 @@ public class CGrep{
         //An arrayList to store all configurations
         ArrayList<Configure> configurations = new ArrayList<Configure>();
         //An arrayList to store all scanActors
-        ArrayList<ScanActor> scanActors = new ArrayList<ScanActor>();
+        ArrayList<ActorRef> scanActors = new ArrayList<ActorRef>();
 
         //Create the collection Actor
-        CollectionActor collectionActor = new CollectionActor();
+        ActorRef collectionActor = actorOf(CollectionActor.class);
 
         //Configuration Object to be constructed for every Scanactor
         Configure configuration;
@@ -43,18 +42,29 @@ public class CGrep{
 
             //NOTE: not sure if the last parameter is correct
             //Create new configuration and queue it within the list
-            configurations.add(new Configure(file, this.searchPattern, collectionActor.context()));
-            scanActors.add(new ScanActor());
+            configurations.add(new Configure(file, this.searchPattern, collectionActor));
+            scanActors.add(actorOf(ScanActor.class));
         }
 
         //Create FileCount object
         FileCount fileCount = new FileCount(this.files.length);
 
-        //send fileCount to collection actor
+        //Start actors
+        collectionActor.start();
 
+        for(ActorRef scan: scanActors){
+            scan.start();
+        }
+
+
+        //send fileCount to collection actor
+        collectionActor.tell(fileCount);
+
+        int counter=0;
         //send configuations to scan actors
         for(Configure config: configurations){
-
+            scanActors.get(counter).tell(config);
+            counter++;
         }
 
         //Scan actor will send a found message to collection actor

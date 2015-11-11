@@ -6,7 +6,7 @@ import akka.actor.UntypedActor;
  */
 public class CollectionActor extends UntypedActor {
 
-    public FileCount fileCount;
+    public int numberOfFiles;
 
     @Override
     //Can recieve two types of Messages
@@ -17,11 +17,14 @@ public class CollectionActor extends UntypedActor {
         //If the message is a FileCount object
         if(message.getClass().getName() == "FileCount"){
             //save the FileCount object to the CollectionActor
-            this.fileCount = (FileCount) message;
+            FileCount fileCount = (FileCount) message;
+
+            this.numberOfFiles = fileCount.fileCount;
         }
+
         //If the message is a Found object and
         // the number of files that have not yet been read is greater than 0
-        else if((message.getClass().getName() == "Found") && (this.fileCount.fileCount > 0)  ){
+        else if((message.getClass().getName() == "Found") && (this.numberOfFiles > 0)  ){
 
             //Cast the object
             Found finalResult = (Found) message;
@@ -34,11 +37,11 @@ public class CollectionActor extends UntypedActor {
                 }
             }
 
-            this.fileCount.fileCount--;
+            this.numberOfFiles--;
         }
 
         //All files have been read, now shutdown all actors
-        if(this.fileCount.fileCount <= 0){
+        if(this.numberOfFiles <= 0){
             Actors.registry().shutdownAll();
         }
 

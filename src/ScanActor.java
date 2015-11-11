@@ -4,6 +4,12 @@
 import akka.*;
 import akka.actor.UntypedActor;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+
 public class ScanActor extends UntypedActor {
     public Configure configuration;
 
@@ -16,11 +22,38 @@ public class ScanActor extends UntypedActor {
             //set the ScanActors configuration object
             this.configuration = (Configure) message;
 
+            //counter to keep track of the file line
+            int lineCounter = 0;
+            //Used to store each line in the file to perform the regex search on
+            String lineText;
 
+            ArrayList<String> results = new ArrayList<String>();
 
+            //Use a BufferedReader to read each line in the file
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(this.configuration.file));
+                while ((lineText = reader.readLine()) != null) {
 
+                    //Append the line of the file
+                    lineCounter++;
 
+                    //if the line of the file matches the regex
+                    if (Pattern.matches(this.configuration.searchRegex, lineText)) {
+                        //Add the line number and the lines contents to the results list
+                        results.add(lineCounter + ": " + lineText);
+                    }
+                }
+            } catch (IOException e) {
+                //Something IO related messed up
+                System.out.println("INVALID FILENAME");
+                System.out.println("The Filename: '" + this.configuration.file + "' Does not exist.");
 
+                //FOR DEBUGING
+                //e.printStackTrace();
+            }
+
+            //construct the result object and send to the CollectionActor
+            this.configuration.collectionActorReference.tell(new Found(this.configuration.file,results));
         }
 
 
