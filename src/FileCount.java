@@ -8,5 +8,5 @@ public class FileCount {
         this.fileCount = files;
     }
 
-    public int getFileCount(){ return fileCount }
+    public int getFileCount(){ return fileCount; }
 }

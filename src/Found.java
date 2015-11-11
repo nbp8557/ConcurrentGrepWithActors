@@ -12,7 +12,7 @@ public class Found {
         this.results = results;
     }
 
-    public String getFilename(){ return filename }
+    public String getFilename(){ return filename; }
 
-    public ArrayList<String> getResults(){ return results }
+    public ArrayList<String> getResults(){ return results; }
 }

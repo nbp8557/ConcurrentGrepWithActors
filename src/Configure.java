@@ -16,7 +16,7 @@ public class Configure {
         this.collectionActorReference = collectionActorReference;
     }
 
-    public String getFile(){ return file }
+    public String getFile(){ return file; }
 
-    public ActorRef getCollectionActorReference() { return collectionActorReference }
+    public ActorRef getCollectionActorReference() { return collectionActorReference; }
 }
