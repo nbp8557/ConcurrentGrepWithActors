@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import akka.actor.Actors.*;
 
 public class CGrep{
     //Used for the thread pool
@@ -26,56 +27,30 @@ public class CGrep{
         ArrayList<Future<Found>> results = new ArrayList<Future<Found>>();
 
 
+        int counter = 0;
         //Loop through each file and queue up the tasks to the thread pool
         for(String file: this.files){
-            //Make sure that the file is not null
-            if(file != null) {
-                //Create a new SearchTask for each file which will search for the regex
-                // and submit it to the ThreadPool for execution.
-                //Also add the Future Object result from the Task to the results file
-                results.add(this.threadResults.submit(new SearchTask(file,this.searchPattern)));
-
-            }
+           counter++;
         }
+        //Create FileCount object
+        FileCount fileCount = new FileCount(counter);
 
-        //Iterate through all of the results
-        // we have to loop a specific number of times because the ExecutorCompletionService
-        // Does not know how many times it calls the take method
-        for(int counter = 0; counter < results.size(); counter++) {
-            final Future<Found> threadResult;
+        //Create the collection Actor
+        CollectionActor collectionActor = new CollectionActor();
 
-            try {
-                //Get the future object when it has completed execution
-                threadResult = this.threadResults.take();
-                try {
-                    //Get the return value from the future AKA the Result Object
-                    final Found finalResult = threadResult.get();
+        //Send the fileCount message to the collectionActor
 
-                    //If the file contained at least one match output the results
-                    if(finalResult.results.size()>0) {
-                        System.out.println("\nThe results for the File: " + finalResult.filename);
-                        //Print each result's line number and text
-                        for (String line : finalResult.results) {
-                            System.out.println(line);
-                        }
-                    }
-		    else{
-                        System.out.println("\nThere was no results for the File: " + finalResult.filename );
-		    }
 
-                } catch (ExecutionException e) {
-                    System.out.println("EXECUTION ERROR");
-                    System.out.println("Future threw an exception while running");
 
-                    //FOR DEBUGING
-                    //e.printStackTrace();
-                }
-            } catch (InterruptedException e) {
-                //Issue when taking the results from the ExecutorCompletionService
-                e.printStackTrace();
-            }
 
-        }
+
+
+
+
+
+
+
+
 
         //Tell the thread pool to shutdown
         //NOTE: This shutdown method will wait for all tasks to complete
