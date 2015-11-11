@@ -3,28 +3,24 @@ import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import akka.actor.ActorRef;
+import akka.actor.ActorRegistry;
 
 import static akka.actor.Actors.*;
 
 public class CGrep{
-    //Used for the thread pool
-    private final ExecutorService threadPool;
-    //Service for storing the results of a threads execution
-    private final ExecutorCompletionService<Found> threadResults;
     //String array to store file names temporarily
     private String[] files;
     //String to store the regex search pattern temporarily
     private String searchPattern;
 
-    public CGrep(int numberOfThreads, String[] files, String searchPattern){
-        this.threadPool = Executors.newFixedThreadPool(numberOfThreads);
-        this.threadResults = new ExecutorCompletionService<Found>(threadPool);
+    public CGrep(String[] files, String searchPattern){
         this.files = files;
         this.searchPattern = searchPattern;
     }
 
     //Search all of the files
     public void SearchAllFiles(){
+        ActorRegistry registry = new ActorRegistry();
         //An arrayList to store all configurations
         ArrayList<Configure> configurations = new ArrayList<Configure>();
         //An arrayList to store all scanActors
@@ -40,10 +36,15 @@ public class CGrep{
         //Loop through each file and queue up the tasks to the thread pool
         for(String file: this.files){
 
-            //NOTE: not sure if the last parameter is correct
+
+            //Doing the check to prevent a bug
+
             //Create new configuration and queue it within the list
-            configurations.add(new Configure(file, this.searchPattern, collectionActor));
-            scanActors.add(actorOf(ScanActor.class));
+            if(file != null){
+                configurations.add(new Configure(file, this.searchPattern, collectionActor));
+                scanActors.add(actorOf(ScanActor.class));
+            }
+
         }
 
         //Create FileCount object
@@ -51,9 +52,11 @@ public class CGrep{
 
         //Start actors
         collectionActor.start();
+        registry.register(collectionActor);
 
         for(ActorRef scan: scanActors){
             scan.start();
+            registry.register(scan);
         }
 
 
@@ -68,7 +71,7 @@ public class CGrep{
         }
 
         //Scan actor will send a found message to collection actor
-
+        registry.shutdownAll();
     }
 
     public static void main(String[] args) {
@@ -104,7 +107,7 @@ public class CGrep{
         }
 
         //initialize the CGrep object with 3 threads
-        CGrep grep = new CGrep(3,file,searchPattern);
+        CGrep grep = new CGrep(file,searchPattern);
 
         //Search all of the files
         grep.SearchAllFiles();

@@ -40,11 +40,6 @@ public class CollectionActor extends UntypedActor {
             this.numberOfFiles--;
         }
 
-        //All files have been read, now shutdown all actors
-        if(this.numberOfFiles <= 0){
-            Actors.registry().shutdownAll();
-        }
-
     }
 
 }
